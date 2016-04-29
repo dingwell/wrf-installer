@@ -140,7 +140,7 @@ build_wrf () {
   fi
   echo -e "$W-Compiling WRF-$D"
   WRF_LOG=compile_wrf.log
-  echo -e "$W-Will output errors to screen, for full details see $WRF_LOG$D"
+  echo -e "${W}Will output errors to screen, for full details see $WRF_LOG$D"
   ./compile -j$NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |grep --color -C 1 -i error
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_compile_log_for_chem $WRF_LOG
