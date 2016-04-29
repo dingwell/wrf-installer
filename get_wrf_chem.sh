@@ -49,8 +49,8 @@ echo "WRF will be installed under $(pwd)/$WRF_DIR"
 
 init_tests () {
   if [[ -e $WRF_DIR ]]; then
-    echo -e "${R}ERROR: Target directory '$WRF_DIR' already exists"
-    echo -e "${R}       Please rename or delete before running installer"
+    echo -e "${R}ERROR: Target directory '$WRF_DIR' already exists${D}"
+    echo -e "${R}       Please rename or delete before running installer${D}"
     exit 1
   fi
 }
