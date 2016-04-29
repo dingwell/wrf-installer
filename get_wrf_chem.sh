@@ -3,49 +3,70 @@
 set -e  # Exit after failed command
 
 # This script will attempt to download and install WRF and WRF-Chem
+#
+# You should configure variables listed under
+#   set_user_wps() and set_wps()
+# according to your system set up.
+#
+# The rest of the configuration/compilation should be handled by this script
+# please let me know if you have any issues.
+#
+# Adam Dingwell
+# publicadam2011@gmail.com
+
 
 # Set up environment (you probably have to change this on each machine)
-module load intel/13.1 intelmpi
+module load intel/13.1 intelmpi # Probably not necessary if installing on private machine
 
-# Path variables:
-export NETCDF="$HOME/local"
-export PATH="$HOME/bin:$HOME/bin/local/bin:$PATH:/usr/lib64/qt-3.3/bin:/usr/bin:/usr/local/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/bubo/sw/uppmax/bin:/opt/thinlinc/bin"
-#export HDF5_DISABLE_VERSION_CHECK=1
-export LD_LIBRARY_PATH="$HOME/local/lib:$LD_LIBRARY_PATH"
+set_user () {
+  # Set common variables (used for WRF/CHEM/WPS)
+  export NETCDF="$HOME/local"
+  export PATH="$HOME/bin:$HOME/bin/local/bin:$PATH:/usr/lib64/qt-3.3/bin:/usr/bin:/usr/local/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/bubo/sw/uppmax/bin:/opt/thinlinc/bin"
+  #export HDF5_DISABLE_VERSION_CHECK=1
+  export LD_LIBRARY_PATH="$HOME/local/lib:$LD_LIBRARY_PATH"
 
-# Options:
-export WRF_CHEM=1 # Whether or not to install WRF-Chem
-export NJOBS=4 # Number of processes to launch when compiling
-export TESTCASE=em_real  # Compile option (test case) for WRF
+  # Options:
+  export WRF_CHEM=1 # Whether or not to install WRF-Chem
+  export NJOBS=4 # Number of processes to launch when compiling
+  export TESTCASE=em_real  # Compile option (test case) for WRF
 
-export VERSION="3.8"
-export WRF_URL=http://www2.mmm.ucar.edu/wrf/src/WRFV${VERSION}.TAR.gz
-export WPS_URL=http://www2.mmm.ucar.edu/wrf/src/WPSV${VERSION}.TAR.gz
-export CHEM_URL=http://www2.mmm.ucar.edu/wrf/src/WRFV3-Chem-${VERSION}.TAR.gz
+  # WRF download URLs (It's probably enough to set the version)
+  export VERSION="3.8"
+  export WRF_URL=http://www2.mmm.ucar.edu/wrf/src/WRFV${VERSION}.TAR.gz
+  export WPS_URL=http://www2.mmm.ucar.edu/wrf/src/WPSV${VERSION}.TAR.gz
+  export CHEM_URL=http://www2.mmm.ucar.edu/wrf/src/WRFV3-Chem-${VERSION}.TAR.gz
+}
 
-export WRF_TAR=$(basename "$WRF_URL")
-export WPS_TAR=$(basename "$WPS_URL")
-export CHEM_TAR=$(basename "$CHEM_URL")
+set_user_wps () {
+  # WPS specific settings
+  # (having these set when compiling WRF can cause problems)
+}
 
-# Determine target directory name:
-if [[ $WRF_CHEM == 1 ]]; then
-  export WRF_DIR="WRF-Chem_$VERSION"
-else
-  export WRF_DIR="WRF_$VERSION"
-fi
+set_common(){
+  # Contains:
+  # * Automatic settings based on set_common()
+  # * Settings which the user does not need to worry about
+  export WRF_TAR=$(basename "$WRF_URL")
+  export WPS_TAR=$(basename "$WPS_URL")
+  export CHEM_TAR=$(basename "$CHEM_URL")
 
-# Settings for coloured output:
-B="\e[01;34m"   # Changes the color of following characters to blue
-W="\e[037;01m"  # Changes the color of following charcters to white (default)
-D="\e[033;00m"  # Changes the color of following charcters to light gray (default)
-P="\e[01;35m"   # Changes the color of following charcters to purple
-R="\e[031;01m"  # Red
+  # Determine target directory name:
+  if [[ $WRF_CHEM == 1 ]]; then
+    export WRF_DIR="WRF-Chem_$VERSION"
+  else
+    export WRF_DIR="WRF_$VERSION"
+  fi
 
-SEP1="$B==================================================$W"
-SEP2="$B--------------------------------------------------$W"
+  # Settings for coloured output:
+  export B="\e[01;34m"   # Changes the color of following characters to blue
+  export W="\e[037;01m"  # Changes the color of following charcters to white (default)
+  export D="\e[033;00m"  # Changes the color of following charcters to light gray (default)
+  export P="\e[01;35m"   # Changes the color of following charcters to purple
+  export R="\e[031;01m"  # Red
 
-# Print some information before starting
-echo "WRF will be installed under $(pwd)/$WRF_DIR"
+  SEP1="$B==================================================$W"
+  SEP2="$B--------------------------------------------------$W"
+}
 
 init_tests () {
   if [[ -e WRFV3 ]]; then
@@ -174,8 +195,12 @@ build_wps () {
 }
 
 # MAIN #
+set_user
+set_common  # Relies on some variables from set_user()
+echo "WRF will be installed under $(pwd)/$WRF_DIR"
 init_tests
 download_packages
 build_wrf
+#set_user_wps  # WPS specific settings
 #build_wps
 #build_chem
