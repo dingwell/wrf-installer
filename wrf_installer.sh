@@ -4,9 +4,9 @@ set -e  # Exit after failed command
 
 # This script will attempt to download and install WRF and WRF-Chem
 #
-# You should configure variables listed under
-#   set_user_wps() and set_wps()
-# according to your system set up.
+# Configuration of this script is made by editing these to files:
+#   + user_settings_common 
+#   + user_settings_wps
 #
 # The rest of the configuration/compilation should be handled by this script
 # please let me know if you have any issues.
@@ -14,59 +14,6 @@ set -e  # Exit after failed command
 # Adam Dingwell
 # publicadam2011@gmail.com
 
-
-# Set up environment (you probably have to change this on each machine)
-module load intel/13.1 intelmpi # Probably not necessary if installing on private machine
-
-set_user () {
-  # Set common variables (used for WRF/CHEM/WPS)
-  export NETCDF="$HOME/local"
-  export PATH="$HOME/bin:$HOME/bin/local/bin:$PATH:/usr/lib64/qt-3.3/bin:/usr/bin:/usr/local/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/bubo/sw/uppmax/bin:/opt/thinlinc/bin"
-  #export HDF5_DISABLE_VERSION_CHECK=1
-  export LD_LIBRARY_PATH="$HOME/local/lib:$LD_LIBRARY_PATH"
-
-  # Options:
-  export WRF_CHEM=1 # Whether or not to install WRF-Chem
-  export NJOBS=4 # Number of processes to launch when compiling
-  export TESTCASE=em_real  # Compile option (test case) for WRF
-
-  # WRF download URLs (It's probably enough to set the version)
-  export VERSION="3.8"
-  export WRF_URL=http://www2.mmm.ucar.edu/wrf/src/WRFV${VERSION}.TAR.gz
-  export WPS_URL=http://www2.mmm.ucar.edu/wrf/src/WPSV${VERSION}.TAR.gz
-  export CHEM_URL=http://www2.mmm.ucar.edu/wrf/src/WRFV3-Chem-${VERSION}.TAR.gz
-}
-
-set_user_wps () {
-  # WPS specific settings
-  # (having these set when compiling WRF can cause problems)
-}
-
-set_common(){
-  # Contains:
-  # * Automatic settings based on set_common()
-  # * Settings which the user does not need to worry about
-  export WRF_TAR=$(basename "$WRF_URL")
-  export WPS_TAR=$(basename "$WPS_URL")
-  export CHEM_TAR=$(basename "$CHEM_URL")
-
-  # Determine target directory name:
-  if [[ $WRF_CHEM == 1 ]]; then
-    export WRF_DIR="WRF-Chem_$VERSION"
-  else
-    export WRF_DIR="WRF_$VERSION"
-  fi
-
-  # Settings for coloured output:
-  export B="\e[01;34m"   # Changes the color of following characters to blue
-  export W="\e[037;01m"  # Changes the color of following charcters to white (default)
-  export D="\e[033;00m"  # Changes the color of following charcters to light gray (default)
-  export P="\e[01;35m"   # Changes the color of following charcters to purple
-  export R="\e[031;01m"  # Red
-
-  SEP1="$B==================================================$W"
-  SEP2="$B--------------------------------------------------$W"
-}
 
 init_tests () {
   if [[ -e WRFV3 ]]; then
@@ -177,33 +124,35 @@ build_wrf () {
   cd ..
 }
 
-# Build WRF:
+check_wps_configuration_for_chem () {
+  # Scan configure.wps for obvious errors
+  echo -e "${W}-Scanning configure.wps for obvious errors-$D"
+  #TODO
+  return 0
+}
+
+# Build WPS:
 build_wps () {
   echo -e "$W=Installing WPS=$D"
+  cd $WRF_DIR
   echo -e "$W-Unpacking WPS-$D"
-  tar -xf "$WPS_TAR"
-  echo -e "$W-Renaming & entering working directory-$D"
-  mv -v $(tar -tf "$WRF_TAR"|head -n1) "$WRF_DIR"
-  cd "$WRF_DIR"
+  tar -xf "../$WPS_TAR"
+  cd WPS
+  echo -e "$W-Making sure directory is clean-$D"
+  ./clean -a
   echo -e "$W-Configuring WPS-$D"
-  if [[ $WRF_CHEM == 1 ]]; then
-    echo -e "${W}Please note that WRF-Chem only works with serial or dmpar options!$D"
-  fi
   ./configure
-  echo -e "$W-Compiling WRF-$D"
-  WRF_LOG=compile_wrf.log
-  echo "Will output errors to screen, for full details see $WRF_LOG"
-  ./compile -j$NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |grep --color -C 1 -i error
+  echo -e "$W-Compiling WPS-$D"
+  ./compile 
 }
 
 # MAIN #
-source users_wrf_settings
-source common_setting  # Relies on some variables from set_user()
+source user_settings_common # User defined variables
+source internal_settings    # Relies on some variables from set_user()
 echo "WRF will be installed under $(pwd)/$WRF_DIR"
-init_tests
-download_packages
-build_wrf
-#source users_wps_settings
-#set_user_wps  # WPS specific settings
-#build_wps
+#init_tests
+#download_packages
+#build_wrf
+source user_settings_wps
+build_wps
 #build_chem
