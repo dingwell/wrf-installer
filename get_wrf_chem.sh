@@ -47,6 +47,14 @@ SEP2="$B--------------------------------------------------$W"
 # Print some information before starting
 echo "WRF will be installed under $(pwd)/$WRF_DIR"
 
+init_tests () {
+  if [[ -e $WRF_DIR ]]; then
+    echo -e "${R}ERROR: Target directory '$WRF_DIR' already exists"
+    echo -e "${R}       Please rename or delete before running installer"
+    exit 1
+  fi
+}
+
 download_packages () {
   if [[ -f $WRF_TAR ]]; then
     echo -e "$W-Found local file '$WRF_TAR' will skip download-$D"
@@ -158,6 +166,7 @@ build_wps () {
 }
 
 # MAIN #
+init_tests
 download_packages
 build_wrf
 #build_wps
