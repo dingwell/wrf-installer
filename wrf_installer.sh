@@ -142,8 +142,11 @@ build_wps () {
   ./clean -a
   echo -e "$W-Configuring WPS-$D"
   ./configure
+  # Replace the default WRF path:
+  sed -i.bak -r 's/(WRF_DIR\s*=).*/\1 ../' configure.wps
+  WPS_LOG=compile_wps.log
   echo -e "$W-Compiling WPS-$D"
-  ./compile 
+  ./compile 2>&1 |tee $WPS_LOG |grep --color -C 1 -i error
 }
 
 # MAIN #
