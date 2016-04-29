@@ -82,11 +82,11 @@ check_wrf_configuration_for_chem () {
   # If you configured WRF for use with WRF-Chem, run this before compiling
   # to verify that you have no obvious errors in your configuration file
   FILE=configure.wrf
-  echo -e "${W}-Verifying that '$FILE' should work with WRF-Chem$D"
+  echo -e "${W}-Verifying that '$FILE' should work with WRF-Chem$D-"
   if ! egrep "ENVCOMPDEFS\s*=\s*-DWRF_CHEM" "$FILE"; then
     echo -e "${R}ERROR: -DWRF_CHEM flag missing$D"
     exit 1
-  elif egrep "WRF_CHEM\s*=\s*1" "$FILE"; then
+  elif ! egrep "WRF_CHEM\s*=\s*1" "$FILE"; then
     echo -e "${R}ERROR: WRF_CHEM flag missing$D"
     exit 1
   elif egrep "OMP\s*=\s*-" "$FILE"; then
