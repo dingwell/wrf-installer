@@ -166,12 +166,14 @@ build_wrf () {
   # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
   # the latter will work as expected.
   ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |grep --color -C 1 -i error
+  echo -e "${G}WRF compilation complete$D"
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
     EMI_LOG=compile_emi-conv.log
     ./compile -j $NJOBS emi_conv 2>&1 |tee $EMI_LOG |grep --color -C 1 -i error
   fi
+  echo -e "${G}WRF-CHEM compilation complete$D"
   cd ..
 }
 
