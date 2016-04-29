@@ -125,8 +125,8 @@ check_wrf_compile_log_for_chem () {
   # If compiling WRF for use with WRF-Chem run this to check for 
   # some common errors:
   LOGFILE=$1
-  echo -e "${W}-Verifying that build should work with WRF-Chem$D"
-  if egrep "WARNING:.*emis_ant" $LOGFILE; then
+  echo -e "${W}-Verifying that build should work with WRF-Chem -$D"
+  if egrep "WARNING:.*no.*array named emis_ant" $LOGFILE; then
     echo -e "${R}ERROR: Emission arrays missing from some modules$D"
     echo -e "${W}Try re-compiling with a clean build directory (./clean -a)$D"
     exit 1
@@ -170,7 +170,7 @@ build_wrf () {
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
     EMI_LOG=compile_emi-conv.log
-    ./compile -J$NJOBS emi_conv 2>&1 |tee $EMI_LOG |grep --color -C 1 -i error
+    ./compile -j $NJOBS emi_conv 2>&1 |tee $EMI_LOG |grep --color -C 1 -i error
   fi
   cd ..
 }
