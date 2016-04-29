@@ -108,7 +108,7 @@ check_wrf_configuration_for_chem () {
   # If you configured WRF for use with WRF-Chem, run this before compiling
   # to verify that you have no obvious errors in your configuration file
   FILE=configure.wrf
-  echo -e "${W}-Verifying that '$FILE' should work with WRF-Chem$D-"
+  echo -e "${W}-Verifying that '$FILE' should work with WRF-Chem -$D"
   if ! egrep "ENVCOMPDEFS\s*=\s*-DWRF_CHEM" "$FILE"; then
     echo -e "${R}ERROR: -DWRF_CHEM flag missing$D"
     exit 1
@@ -126,14 +126,14 @@ check_wrf_compile_log_for_chem () {
   # some common errors:
   LOGFILE=$1
   echo -e "${W}-Verifying that build should work with WRF-Chem$D"
-  if egrep "WARNING:.*emis_ant"; then
+  if egrep "WARNING:.*emis_ant" $LOGFILE; then
     echo -e "${R}ERROR: Emission arrays missing from some modules$D"
     echo -e "${W}Try re-compiling with a clean build directory (./clean -a)$D"
     exit 1
-  elif egrep "libnetcdf\.a.*nc_del_att"; then
+  elif egrep "libnetcdf\.a.*nc_del_att" $LOGFILE; then
     echo -e "${R}ERROR: NetCDF error detected, verify environment and try again"
     exit 1
-  elif egrep "dec_jpeg2000.*catastrophic error";then
+  elif egrep "dec_jpeg2000.*catastrophic error" $LOGFILE;then
     echo -e "${R}ERROR: Please disable WPS environment variables, and try again"
     exit 1
   fi
