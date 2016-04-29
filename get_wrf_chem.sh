@@ -141,7 +141,10 @@ build_wrf () {
   echo -e "$W-Compiling WRF-$D"
   WRF_LOG=compile_wrf.log
   echo -e "${W}Will output errors to screen, for full details see $WRF_LOG$D"
-  ./compile -j$NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |grep --color -C 1 -i error
+  # Note: compile does not take unix-style arguments; it's written to look like
+  # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
+  # the latter will work as expected.
+  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |grep --color -C 1 -i error
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
