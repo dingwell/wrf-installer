@@ -154,11 +154,11 @@ build_wps () {
 }
 
 # MAIN #
-source user_settings_common # User defined variables
-source internal_settings    # Relies on some variables from set_user()
+source user_settings_common.bash # User defined variables
+source internal_settings.bash    # Relies on some variables from set_user()
 echo "WRF will be installed under $(pwd)/$WRF_DIR"
 init_tests
 download_packages
 build_wrf
-source user_settings_wps
+source user_settings_wps.bash
 build_wps
