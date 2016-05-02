@@ -123,7 +123,7 @@ build_wrf () {
   # Note: compile does not take unix-style arguments; it's written to look like
   # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
   # the latter will work as expected.
-  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error.[^o]"
+  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error\.[^a-zA-Z]"
   echo -e "${G}WRF compilation complete$D"
 
   check_wrf_compile_log $WRF_LOG
