@@ -1,17 +1,9 @@
 # This file will be source by wrf_installer.sh 
 # The file should use a format compatible with Bash
 
-# Path variables:
-
-export NETCDF="$HOME/local"
-export PATH="$HOME/bin:$HOME/bin/local/bin:$PATH:/usr/lib64/qt-3.3/bin:/usr/bin:/usr/local/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/bubo/sw/uppmax/bin:/opt/thinlinc/bin"
-export LD_LIBRARY_PATH="$HOME/local/lib:$LD_LIBRARY_PATH"
+# Path variables (will also use common settings)
 export JASPERLIB=$HOME/local/lib
 export JASPERINC=$HOME/local/include
-
-#COMPRESSION_LIBS        =       -L$(HOME)/local/lib -ljasper -lpng -lz 
-#COMPRESSION_INC         =       -I$(HOME)/local/include \ 
-#                                   -I$(HOME)/local/include/jasper
 
 # Installer options:
 export WRF_CHEM=1         # 1 = WRF-Chem, 0 = only WRF
