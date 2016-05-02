@@ -14,7 +14,7 @@ This tool will help you install WRF and WPS on your system.
 * The installer will download all the necessary tar-balls automatically; but if
 you prefer, you can download them yourself and place them in the working
 directory. If you download them yourself, ensure that the version string in
-*user_settings_common.bash* matches that of your files.
-* This script installer assumes that all dependencies are already installed on
+*user_settings_common.bash* matches that of your downloaded files.
+* This installer assumes that all dependencies are already installed on
   your system (I might add installation instructions for these as well, but
   that's a bit more work...)
