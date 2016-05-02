@@ -145,6 +145,10 @@ build_wps () {
   # Replace the default WRF path:
   sed -i.bak -r 's/(WRF_DIR\s*=).*/\1 ../' configure.wps
   WPS_LOG=compile_wps.log
+  # If MPI_ROOT is missing, try with I_MPI_ROOT:
+  if [[ -z $MPI_ROOT ]]; then
+    export MPI_ROOT=$I_MPI_ROOT
+  fi
   echo -e "$W-Compiling WPS-$D"
   ./compile 2>&1 |tee $WPS_LOG |grep --color -C 1 -i error
 }
