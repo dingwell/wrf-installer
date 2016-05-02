@@ -68,6 +68,18 @@ check_wrf_configuration_for_chem () {
   fi
 }
 
+check_wrf_compile_log () {
+  # Check for some common errors
+  LOGFILE=$1
+  echo -e "${W}-Scanning '$LOGFILE' for errors-$D"
+
+  if egrep "you have not loaded a compiler module yet!" $LOGFILE; then
+    echo -e "${R}ERROR: It seems there is no compiler module loaded$D"
+    echo -e "${W}Adjust your build environment and re-run wrf-installer.sh$D"
+    exit 1
+  fi
+}
+
 check_wrf_compile_log_for_chem () {
   # If compiling WRF for use with WRF-Chem run this to check for 
   # some common errors:
@@ -86,7 +98,6 @@ check_wrf_compile_log_for_chem () {
   fi
 }
   
-
 build_wrf () {
   echo -e "$W=Installing WRF=$D"
   echo -e "$W-Unpacking WRF-$D"
@@ -114,6 +125,8 @@ build_wrf () {
   # the latter will work as expected.
   ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |grep --color -C 1 -i error
   echo -e "${G}WRF compilation complete$D"
+
+  check_wrf_compile_log $WRF_LOG
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
