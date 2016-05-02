@@ -5,7 +5,7 @@ This tool will help you install WRF and WPS on your system.
 ## Usage
 * Downloand the scripts to a clean working directory.
 * Edit *user_settings_common.bash* and *user_settings_wps.bash* to match your environment
-* For WRF-Chem: set **WRF_CHEM=1**; otherwise: set **WRF_CHEM=0**
+* If you want to install WRF-Chem, set **WRF_CHEM=1**, otherwise set **WRF_CHEM=0**
 * run the installer: *./wrf_installer.sh*
 * You will need to select compiler options as usual when the configuration
   scripts are running (once for WRF and once for WPS).
