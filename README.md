@@ -1,4 +1,4 @@
-# WRF-installer
+# WRF-installer (beta)
 
 This tool will help you install WRF and WPS on your system.
 
