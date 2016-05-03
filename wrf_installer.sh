@@ -65,11 +65,11 @@ check_wrf_configuration () {
   # Check if pre-processor is set up properly for all files:
   if [[ $FC == "ifort" ]] || [[ $FC == "gfortran" ]]; then
     if egrep "FORMAT_FIXED\s*=\s*-FI\s*$" "$FILE"; then
-      echo -e "${W}-Adjusting FORMAT_FIXED from '-FI' to '-FI -cpp'-$D"
+      echo -e "${W}Adjusting FORMAT_FIXED from '-FI' to '-FI -cpp'$D"
       sed -i.bak -r 's/(FORMAT_FIXED\s*=\s*).*/\1-FI -cpp/' "$FILE"
     fi
     if egrep "FORMAT_FREE\s*=\s*-FR\s*$" "$FILE"; then
-      echo -e "${W}-Adjusting FORMAT_FREE from '-FR' to '-FR -cpp'-$D"
+      echo -e "${W}Adjusting FORMAT_FREE from '-FR' to '-FR -cpp'$D"
       sed -i.bak -r 's/(FORMAT_FREE\s*=\s*).*/\1-FR -cpp/' "$FILE"
     fi
   fi
