@@ -31,7 +31,7 @@ init_tests () {
 check_for_dependencies () {
   # Check for dependencies and query the user to install missing libraries
   echo "$W-Checking dependencies-$D"
-
+  echo "$W-TODO-$D"
 }
 
 download_packages () {
