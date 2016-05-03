@@ -123,7 +123,7 @@ build_wrf () {
   # Note: compile does not take unix-style arguments; it's written to look like
   # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
   # the latter will work as expected.
-  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error\.[^a-z]"
+  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error.[^a-z]"
   echo -e "${G}WRF compilation complete$D"
 
   check_wrf_compile_log $WRF_LOG
@@ -131,7 +131,7 @@ build_wrf () {
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
     EMI_LOG=compile_emi-conv.log
-    ./compile -j $NJOBS emi_conv 2>&1 |tee $EMI_LOG |egrep --color -C 1 -i "error\.[^a-z]"
+    ./compile -j $NJOBS emi_conv 2>&1 |tee $EMI_LOG |egrep --color -C 1 -i "error.[^a-z]"
   fi
   echo -e "${G}WRF-CHEM compilation complete$D"
   cd ..
@@ -163,7 +163,7 @@ build_wps () {
     export MPI_ROOT=$I_MPI_ROOT
   fi
   echo -e "$W-Compiling WPS-$D"
-  ./compile 2>&1 |tee $WPS_LOG |egrep --color -C 1 -i "error\.[^a-z]"
+  ./compile 2>&1 |tee $WPS_LOG |egrep --color -C 1 -i "error.[^a-z]"
 }
 
 # MAIN #
