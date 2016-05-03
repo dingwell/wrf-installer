@@ -98,9 +98,12 @@ check_wrf_compile_log () {
   LOGFILE=$1
   echo -e "${W}-Scanning '$LOGFILE' for errors-$D"
 
-  if egrep "you have not loaded a compiler module yet!" $LOGFILE; then
+  if egrep "you have not loaded a compiler module yet!" "$LOGFILE"; then
     echo -e "${R}ERROR: It seems there is no compiler module loaded$D"
     echo -e "${W}Adjust your build environment and re-run wrf-installer.sh$D"
+    exit 1
+  elif egrep -i "compilation aboirted for .*" "$LOGFILE"; then
+    echo -e "${R}ERROR: Compiling WRF failed, see '$LOGFILE' for details$D"
     exit 1
   fi
 }
