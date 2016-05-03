@@ -28,6 +28,11 @@ init_tests () {
   fi
 }
 
+check_for_dependencies () {
+  # Check for dependencies and query the user to install missing libraries
+  
+}
+
 download_packages () {
   if [[ -f $WRF_TAR ]]; then
     echo -e "$W-Found local file '$WRF_TAR' will skip download-$D"
@@ -49,6 +54,25 @@ download_packages () {
       wget "$CHEM_URL"
     fi
   fi
+}
+
+check_wrf_configuration () {
+  FILE=configure.wrf
+  echo -e "${W}-Checking validity of '$FILE'-$D"
+  # Check for some common errors in configure.wrf:
+
+  # Check if pre-processor is set up properly for all files:
+  if [[ $FC == "ifort" ]] || [[ $FC == "gfortran" ]]; then
+    if egrep "FORMAT_FIXED\s*=\s*-FI\s*$"; then
+      echo -e "${W}-Adjusting FORMAT_FIXED from '-FI' to '-FI -cpp'-$D"
+      sed -i.bak -r 's/(FORMAT_FIXED\s*=\s*).*/\1-FI -cpp/' "$FILE"
+    fi
+    if egrep "FORMAT_FREE\s*=\s*-FR\s*$"; then
+      echo -e "${W}-Adjusting FORMAT_FREE from '-FR' to '-FR -cpp'-$D"
+      sed -i.bak -r 's/(FORMAT_FREE\s*=\s*).*/\1-FR -cpp/' "$FILE"
+    fi
+  fi
+
 }
 
 check_wrf_configuration_for_chem () {
@@ -114,6 +138,7 @@ build_wrf () {
     echo -e "${W}Please note that WRF-Chem only works with serial or dmpar options!$D"
   fi
   ./configure
+  check_wrf_configuration # Check for some common mistakes
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_configuration_for_chem
   fi
