@@ -10,7 +10,7 @@ export LD_LIBRARY_PATH="$HOME/local/lib:$LD_LIBRARY_PATH"
 
 # Installer options:
 export WRF_CHEM=1         # 1 = WRF-Chem, 0 = only WRF
-export NJOBS=4            # Number of processes to launch when compiling (1-20)
+export NJOBS=2            # Number of processes to launch when compiling (1-20)
 export TESTCASE=em_real   # Compile option (test case) for WRF
 
 # WRF download URLs (It's probably enough to set the version)
