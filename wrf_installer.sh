@@ -105,6 +105,11 @@ check_wrf_compile_log () {
   elif egrep -i "compilation aboirted for .*" "$LOGFILE"; then
     echo -e "${R}ERROR: Compiling WRF failed, see '$LOGFILE' for details$D"
     exit 1
+  elif egrep -i "real_em.f90(12): error #7002"; then
+    echo -e "${R}ERROR: The executable failed to build$D"
+    echo -e "${W}This can happen if you are compiling with too many threads$D"
+    echo -e "${W}Re-run with J=1 or J=2, or run ./compile manually$D"
+    exit 1
   fi
 }
 
@@ -197,6 +202,7 @@ build_wps () {
 
 # MAIN #
 source user_settings_common.bash # User defined variables
+echo "NETCDF: $NETCDF"
 source internal_settings.bash    # Relies on some variables from set_user()
 echo "WRF will be installed under $(pwd)/$WRF_DIR"
 init_tests
