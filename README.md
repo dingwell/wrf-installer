@@ -1,6 +1,7 @@
 # WRF-installer (beta)
 
-This tool will help you install WRF and WPS on your system.
+This tool will help you install WRF and WPS on a selection of systems
+available to researchers at Uppsala University.
 
 ## Usage
 * Downloand archive (tar or zip) and unpack
