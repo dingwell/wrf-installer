@@ -102,7 +102,7 @@ check_wrf_compile_log () {
     echo -e "${R}ERROR: It seems there is no compiler module loaded$D"
     echo -e "${W}Adjust your build environment and re-run wrf-installer.sh$D"
     exit 1
-  elif egrep -i "real_em.f90(12): error #7002"; then
+  elif egrep -i "real_em.f90(12): error #7002" "$LOGFILE"; then
     echo -e "${R}ERROR: The executable failed to build$D"
     echo -e "${W}This can happen if you are compiling with too many threads$D"
     echo -e "${W}Re-run with J=1 or J=2, or run ./compile manually$D"
