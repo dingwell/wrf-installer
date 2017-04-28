@@ -102,14 +102,14 @@ check_wrf_compile_log () {
     echo -e "${R}ERROR: It seems there is no compiler module loaded$D"
     echo -e "${W}Adjust your build environment and re-run wrf-installer.sh$D"
     exit 1
-  elif egrep -i "compilation aboirted for .*" "$LOGFILE"; then
-    echo -e "${R}ERROR: Compiling WRF failed, see '$LOGFILE' for details$D"
-    exit 1
   elif egrep -i "real_em.f90(12): error #7002"; then
     echo -e "${R}ERROR: The executable failed to build$D"
     echo -e "${W}This can happen if you are compiling with too many threads$D"
     echo -e "${W}Re-run with J=1 or J=2, or run ./compile manually$D"
-    exit 1
+    return 1
+  elif egrep -i "compilation aborted for .*" "$LOGFILE"; then
+    echo -e "${R}ERROR: Compiling WRF failed, see '$LOGFILE' for details$D"
+    return 1
   fi
 }
 
@@ -130,7 +130,25 @@ check_wrf_compile_log_for_chem () {
     exit 1
   fi
 }
-  
+ 
+run_wrf_compile(){
+  # This function will run the ./compile command (in the WRF directory)
+  # A full log will be written to $WRF_LOG (env. variable)
+  # errors will also be forwarded to stdout
+  echo -e "$W-Compiling WRF-$D"
+  if [[ -z $WRF_LOG ]]; then
+    WRF_LOG=compile_wrf.log
+  fi
+  echo -e "${W}Will output errors to screen, for full details see $WRF_LOG$D"
+  # Note: compile does not take unix-style arguments; it's written to look like
+  # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
+  # the latter will work as expected.
+  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error.[^a-z]"
+
+  echo -e "${G}WRF compilation complete$D"
+  return 0
+}
+
 build_wrf () {
   echo -e "$W=Installing WRF=$D"
   echo -e "$W-Unpacking WRF-$D"
@@ -151,16 +169,25 @@ build_wrf () {
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_configuration_for_chem
   fi
-  echo -e "$W-Compiling WRF-$D"
-  WRF_LOG=compile_wrf.log
-  echo -e "${W}Will output errors to screen, for full details see $WRF_LOG$D"
-  # Note: compile does not take unix-style arguments; it's written to look like
-  # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
-  # the latter will work as expected.
-  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error.[^a-z]"
-  echo -e "${G}WRF compilation complete$D"
 
-  check_wrf_compile_log $WRF_LOG
+  export WRF_LOG="compile_wrf.log"
+  run_wrf_compile
+
+  # Check if there were any errors and suggest solutions:
+  while ! check_wrf_compile_log $WRF_LOG; do
+    echo "Compilation error detected!"
+    echo "Some errors might be solved by running ./compile again,"
+    echo "especially if you are trying to run with a high job count."
+    read -p "${W}Should I try to continue by re-running ./compile? [y/N]$D" -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      echo "${W}Trying to continue compilation$D"
+      run_wrf_compile
+    else
+      echo "${W}Exited with errors$D"
+      exit 1
+    fi
+  done
+
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
