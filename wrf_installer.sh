@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  # Exit after failed command
+#set -e  # Exit after failed command
 
 # This script will attempt to download and install WRF and WRF-Chem
 #
@@ -111,6 +111,7 @@ check_wrf_compile_log () {
     echo -e "${R}ERROR: Compiling WRF failed, see '$LOGFILE' for details$D"
     return 1
   fi
+  return 0
 }
 
 check_wrf_compile_log_for_chem () {
@@ -136,6 +137,8 @@ run_wrf_compile(){
   # A full log will be written to $WRF_LOG (env. variable)
   # errors will also be forwarded to stdout
   echo -e "$W-Compiling WRF-$D"
+
+  WRF_LOG=$1
   if [[ -z $WRF_LOG ]]; then
     WRF_LOG=compile_wrf.log
   fi
@@ -143,14 +146,13 @@ run_wrf_compile(){
   # Note: compile does not take unix-style arguments; it's written to look like
   # it does, but it does not! E.g. '-j8' should be equivalent to '-j 8' but only
   # the latter will work as expected.
-  ./compile -j $NJOBS $TESTCASE 2>&1 |tee $WRF_LOG |egrep --color -C 1 -i "error.[^a-z]"
+  ./compile -j $NJOBS $TESTCASE 2>&1 |tee "$WRF_LOG" |egrep --color -C 1 -i "error.[^a-z]"
 
   echo -e "${G}WRF compilation complete$D"
   return 0
 }
 
-build_wrf () {
-  echo -e "$W=Installing WRF=$D"
+unpack_wrf () {
   echo -e "$W-Unpacking WRF-$D"
   tar -xf "$WRF_TAR"
   echo -e "$W-Renaming & entering working directory-$D"
@@ -164,26 +166,35 @@ build_wrf () {
   if [[ $WRF_CHEM == 1 ]]; then
     echo -e "${W}Please note that WRF-Chem only works with serial or dmpar options!$D"
   fi
+}
+
+
+build_wrf () {
+  echo -e "$W=Installing WRF=$D"
+  unpack_wrf
+  cd "$WRF_DIR"
   ./configure
   check_wrf_configuration # Check for some common mistakes
   if [[ $WRF_CHEM == 1 ]]; then
     check_wrf_configuration_for_chem
   fi
 
-  export WRF_LOG="compile_wrf.log"
-  run_wrf_compile
+  WRF_LOG="compile_wrf.log"
+  run_wrf_compile "$WRF_LOG"
 
   # Check if there were any errors and suggest solutions:
   while ! check_wrf_compile_log $WRF_LOG; do
     echo "Compilation error detected!"
     echo "Some errors might be solved by running ./compile again,"
     echo "especially if you are trying to run with a high job count."
-    read -p "${W}Should I try to continue by re-running ./compile? [y/N]$D" -n 1 -r
+    echo -ne "$W"
+    read -p "Should I try to continue by re-running ./compile? [y/N]" -n 1 -r
+    echo -ne "$D"
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      echo "${W}Trying to continue compilation$D"
+      echo -e "${W}Trying to continue compilation$D"
       run_wrf_compile
     else
-      echo "${W}Exited with errors$D"
+      echo -e "${W}Exited with errors$D"
       exit 1
     fi
   done
@@ -192,6 +203,7 @@ build_wrf () {
     check_wrf_compile_log_for_chem $WRF_LOG
     echo -e "$W-Compiling external emissions conversion code-$D"
     EMI_LOG=compile_emi-conv.log
+    echo -e "${W}Will output errors to screen, for full details see $EMI_LOG$D"
     ./compile -j $NJOBS emi_conv 2>&1 |tee $EMI_LOG |egrep --color -C 1 -i "error.[^a-z]"
   fi
   echo -e "${G}WRF-CHEM compilation complete$D"
@@ -213,17 +225,26 @@ build_wps () {
   tar -xf "../$WPS_TAR"
   cd WPS
   echo -e "$W-Making sure directory is clean-$D"
-  ./clean -a
+  ./clean -a &> clean.log
   echo -e "$W-Configuring WPS-$D"
   ./configure
+
   # Replace the default WRF path:
   sed -i.bak -r 's/(WRF_DIR\s*=).*/\1 ../' configure.wps
   WPS_LOG=compile_wps.log
+
   # If MPI_ROOT is missing, try with I_MPI_ROOT:
   if [[ -z $MPI_ROOT ]]; then
     export MPI_ROOT=$I_MPI_ROOT
   fi
+
+  # If enc_jpeg2000.c contains a reference to the private variable "inmem",
+  # comment it out since this has been removed from newer releases of libjasper:
+  sed -i.bak -r 's;^(\s*image.inmem_.*);//\1 //Removed by wrf-installer/' \
+    ./ungrib/src/ngl/g2/enc_jpeg2000.c
+
   echo -e "$W-Compiling WPS-$D"
+  echo -e "${W}Will output errors to screen, for full details see $WPS_LOG$D"
   ./compile 2>&1 |tee $WPS_LOG |egrep --color -C 1 -i "error.[^a-z]"
 }
 
@@ -232,8 +253,8 @@ source user_settings_common.bash # User defined variables
 echo "NETCDF: $NETCDF"
 source internal_settings.bash    # Relies on some variables from set_user()
 echo "WRF will be installed under $(pwd)/$WRF_DIR"
-init_tests
-download_packages
+#init_tests
+#download_packages
 build_wrf
 source user_settings_wps.bash
 build_wps
