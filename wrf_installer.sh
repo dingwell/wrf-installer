@@ -240,7 +240,7 @@ build_wps () {
 
   # If enc_jpeg2000.c contains a reference to the private variable "inmem",
   # comment it out since this has been removed from newer releases of libjasper:
-  sed -i.bak -r 's;^(\s*image.inmem_.*);//\1 //Removed by wrf-installer/' \
+  sed -i.bak -r 's;^(\s*image.inmem_.*);//\1 //Removed by wrf-installer;' \
     ./ungrib/src/ngl/g2/enc_jpeg2000.c
 
   echo -e "$W-Compiling WPS-$D"
