@@ -253,8 +253,8 @@ source user_settings_common.bash # User defined variables
 echo "NETCDF: $NETCDF"
 source internal_settings.bash    # Relies on some variables from set_user()
 echo "WRF will be installed under $(pwd)/$WRF_DIR"
-#init_tests
-#download_packages
+init_tests
+download_packages
 build_wrf
 source user_settings_wps.bash
 build_wps
